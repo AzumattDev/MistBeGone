@@ -18,12 +18,13 @@ namespace MistBeGone
     public class MistBeGonePlugin : BaseUnityPlugin
     {
         internal const string ModName = "MistBeGone";
-        internal const string ModVersion = "1.0.3";
+        internal const string ModVersion = "1.0.4";
         internal const string Author = "Azumatt";
         private const string ModGUID = Author + "." + ModName;
         private static string ConfigFileName = ModGUID + ".cfg";
+        internal static string ConnectionError = "";
         private static string ConfigFileFullPath = Paths.ConfigPath + Path.DirectorySeparatorChar + ConfigFileName;
-        private static readonly ConfigSync ConfigSync = new(ModGUID) { DisplayName = ModName, CurrentVersion = ModVersion, MinimumRequiredVersion = ModVersion, ModRequired = true };
+        private static readonly ConfigSync ConfigSync = new(ModGUID) { DisplayName = ModName, CurrentVersion = ModVersion, MinimumRequiredVersion = ModVersion };
         private readonly Harmony _harmony = new(ModGUID);
 
         public static readonly ManualLogSource MistBeGoneLogger = BepInEx.Logging.Logger.CreateLogSource(ModName);
