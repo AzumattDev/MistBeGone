@@ -1,6 +1,6 @@
 {
   "name": "MistBeGone",
-  "version_number": "1.0.4",
+  "version_number": "1.0.5",
   "website_url": "https://discord.gg/pdHgy6Bsng",
   "description": "A simple plugin that removes the Mist from Mistlands. Globally. Everywhere. It gives no fucks. Will control anything that uses the vanilla mist components to generate mist. Use global keys or not to control when.",
   "dependencies": [

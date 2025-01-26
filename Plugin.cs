@@ -18,7 +18,7 @@ namespace MistBeGone
     public class MistBeGonePlugin : BaseUnityPlugin
     {
         internal const string ModName = "MistBeGone";
-        internal const string ModVersion = "1.0.4";
+        internal const string ModVersion = "1.0.5";
         internal const string Author = "Azumatt";
         private const string ModGUID = Author + "." + ModName;
         private static string ConfigFileName = ModGUID + ".cfg";
@@ -135,16 +135,14 @@ namespace MistBeGone
 
         public static bool AreAllRequiredGlobalKeysSet()
         {
-            HashSet<GlobalKeys> requiredSet = ParseGlobalKeysFromString(_globalKeysNeededList.Value);
+            (HashSet<GlobalKeys> enumKeys, HashSet<string> customKeys) = ParseRequiredKeysFromString(_globalKeysNeededList.Value);
 
-            if (requiredSet.Count == 0) return true;
-
+            if (enumKeys.Count == 0 && customKeys.Count == 0)
+                return true;
             if (ZoneSystem.instance == null)
-            {
                 return false;
-            }
 
-            foreach (GlobalKeys key in requiredSet)
+            foreach (GlobalKeys key in enumKeys)
             {
                 if (!ZoneSystem.instance.m_globalKeysEnums.Contains(key))
                 {
@@ -153,7 +151,16 @@ namespace MistBeGone
                 }
             }
 
-            MistBeGoneLogger.LogDebug("All required global keys are set.");
+            foreach (string strKey in customKeys)
+            {
+                // This uses the exact-match approach:
+                if (!ZoneSystem.instance.GetGlobalKeyExact(strKey))
+                {
+                    return false;
+                }
+            }
+
+            MistBeGoneLogger.LogDebug("All required global keys (both enum + custom) are set.");
             return true;
         }
 
@@ -174,31 +181,34 @@ namespace MistBeGone
             SRemoveMist = shouldRemove;
         }
 
-        public static HashSet<GlobalKeys> ParseGlobalKeysFromString(string input)
+        public static (HashSet<GlobalKeys> enumKeys, HashSet<string> customKeys) ParseRequiredKeysFromString(string input)
         {
-            HashSet<GlobalKeys> results = [];
+            HashSet<GlobalKeys> enumKeys = [];
+            HashSet<string> customKeys = [];
 
             if (string.IsNullOrWhiteSpace(input))
-                return results; // nothing to parse => empty set
-
+                return (enumKeys, customKeys);
 
             string[] split = input.Split([','], StringSplitOptions.RemoveEmptyEntries);
 
             foreach (string raw in split)
             {
                 string trimmed = raw.Trim();
+
+                // Try parse as an enum first:
                 if (Enum.TryParse(trimmed, out GlobalKeys parsed))
                 {
-                    MistBeGoneLogger.LogDebug($"Parsed global key: '{parsed}'");
-                    results.Add(parsed);
+                    MistBeGoneLogger.LogDebug($"Parsed global enum key: '{parsed}'");
+                    enumKeys.Add(parsed);
                 }
                 else
                 {
-                    MistBeGoneLogger.LogWarning($"Invalid GlobalKey in config: '{trimmed}'");
+                    MistBeGoneLogger.LogDebug($"Parsed custom global key: '{trimmed}'");
+                    customKeys.Add(trimmed);
                 }
             }
 
-            return results;
+            return (enumKeys, customKeys);
         }
     }
 
